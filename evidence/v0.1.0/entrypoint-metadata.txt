@@ -1,0 +1,5 @@
+$ .venv-current/bin/python -c 'from importlib.metadata import entry_points,metadata; print("pytest entry point:", list(entry_points(group="pytest11").select(name="replay_twice"))); print("runtime dependencies:", metadata("replay-twice").get_all("Requires-Dist"))'
+pytest entry point: [EntryPoint(name='replay_twice', value='replay_twice.plugin', group='pytest11')]
+runtime dependencies: ['pytest>=7']
+
+[exit_code=0]

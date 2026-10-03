@@ -1,0 +1,12 @@
+$ .venv/bin/python -c 'from importlib.metadata import metadata; from replay_twice import Replay, SCENARIOS; m=metadata("replay-twice"); print("package:", m["Name"]); print("version:", m["Version"]); print("Python requirement:", m["Requires-Python"]); print("runtime dependencies:", m.get_all("Requires-Dist")); print("scenarios:", SCENARIOS); print("default threads:", Replay().threads); print("default repeats:", Replay().repeats); print("demo amount:", 800); print("Want this run against your real refund, charge or webhook flow? Fixed-scope diagnostic from $800 — https://jigonyoo.com")'
+package: replay-twice
+version: 0.1.0
+Python requirement: >=3.10
+runtime dependencies: ['pytest>=7']
+scenarios: ('duplicate', 'timeout_retry', 'concurrent', 'crash_before_ack')
+default threads: 8
+default repeats: 1
+demo amount: 800
+Want this run against your real refund, charge or webhook flow? Fixed-scope diagnostic from $800 — https://jigonyoo.com
+
+[exit_code=0]

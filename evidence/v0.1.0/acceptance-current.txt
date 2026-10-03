@@ -1,0 +1,81 @@
+$ env PIP_NO_INDEX=1 'PIP_FIND_LINKS=<project>/wheels' 'PIP_CACHE_DIR=<project>/.pip-cache' 'TMPDIR=<project>/.tmp' zsh -c 'source .venv-current/bin/activate && pip install -e . && pytest -q && replay-twice report'
+Looking in links: <project>/wheels
+Obtaining file://<project>
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Processing ./wheels/pytest-9.1.1-py3-none-any.whl
+Processing ./wheels/packaging-26.3-py3-none-any.whl
+Processing ./wheels/pluggy-1.6.0-py3-none-any.whl
+Processing ./wheels/pygments-2.21.0-py3-none-any.whl
+Processing ./wheels/iniconfig-2.3.0-py3-none-any.whl
+Processing ./wheels/tomli-2.4.1-py3-none-any.whl
+Processing ./wheels/exceptiongroup-1.3.1-py3-none-any.whl
+Processing ./wheels/typing_extensions-4.16.0-py3-none-any.whl
+Building wheels for collected packages: replay-twice
+  Building editable for replay-twice (pyproject.toml): started
+  Building editable for replay-twice (pyproject.toml): finished with status 'done'
+  Created wheel for replay-twice: filename=replay_twice-0.1.0-0.editable-py3-none-any.whl size=6784 sha256=b86515242e1a8618d957cafbbe191a16b24c4fc89a8cd635821c56a16af03a85
+  Stored in directory: <project>/.tmp/pip-ephem-wheel-cache-2gf07r_g/wheels/92/d0/32/0127026f4ca118fb94bbb5bd80471a0bfe6b838cb0ccb254ff
+Successfully built replay-twice
+Installing collected packages: typing-extensions, tomli, pygments, pluggy, packaging, iniconfig, exceptiongroup, pytest, replay-twice
+Successfully installed exceptiongroup-1.3.1 iniconfig-2.3.0 packaging-26.3 pluggy-1.6.0 pygments-2.21.0 pytest-9.1.1 replay-twice-0.1.0 tomli-2.4.1 typing-extensions-4.16.0
+.........................                                                [100%]
+25 passed in 1.91s
+# replay-twice measurements
+
+Concurrency can vary across runs. Seed controls event IDs, not thread scheduling. check_then_act deliberately sleeps between reading and writing. SQLite ledger rows are simulated effects; no payment API is called.
+
+Environment:
+
+```json
+{
+  "os": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.10.22",
+  "package_version": "0.1.0",
+  "seed": 0,
+  "threads": 8,
+  "concurrent_repeats": 200,
+  "runs": 3,
+  "race_delay_seconds": 0.001,
+  "utc": "2026-10-03T12:44:37.613702+00:00"
+}
+```
+
+Ranges below are exact minimum–maximum counts across the recorded runs.
+
+| Flow | Handler | Scenario | Trials/run | Duplicate trials/run range | Failed trials/run range | Effects observed |
+|---|---|---|---:|---:|---:|---|
+| refund | naive | duplicate | 1 | 1–1 | 1–1 | [2] |
+| refund | naive | timeout_retry | 1 | 1–1 | 1–1 | [2] |
+| refund | naive | concurrent | 200 | 200–200 | 200–200 | [8] |
+| refund | naive | crash_before_ack | 1 | 1–1 | 1–1 | [2] |
+| refund | check_then_act | duplicate | 1 | 0–0 | 0–0 | [1] |
+| refund | check_then_act | timeout_retry | 1 | 0–0 | 0–0 | [1] |
+| refund | check_then_act | concurrent | 200 | 200–200 | 200–200 | [8] |
+| refund | check_then_act | crash_before_ack | 1 | 0–0 | 0–0 | [1] |
+| refund | guarded | duplicate | 1 | 0–0 | 0–0 | [1] |
+| refund | guarded | timeout_retry | 1 | 0–0 | 0–0 | [1] |
+| refund | guarded | concurrent | 200 | 0–0 | 0–0 | [1] |
+| refund | guarded | crash_before_ack | 1 | 0–0 | 0–0 | [1] |
+| payment.succeeded | naive | duplicate | 1 | 1–1 | 1–1 | [2] |
+| payment.succeeded | naive | timeout_retry | 1 | 1–1 | 1–1 | [2] |
+| payment.succeeded | naive | concurrent | 200 | 200–200 | 200–200 | [8] |
+| payment.succeeded | naive | crash_before_ack | 1 | 1–1 | 1–1 | [2] |
+| payment.succeeded | check_then_act | duplicate | 1 | 0–0 | 0–0 | [1] |
+| payment.succeeded | check_then_act | timeout_retry | 1 | 0–0 | 0–0 | [1] |
+| payment.succeeded | check_then_act | concurrent | 200 | 200–200 | 200–200 | [6, 8] |
+| payment.succeeded | check_then_act | crash_before_ack | 1 | 0–0 | 0–0 | [1] |
+| payment.succeeded | guarded | duplicate | 1 | 0–0 | 0–0 | [1] |
+| payment.succeeded | guarded | timeout_retry | 1 | 0–0 | 0–0 | [1] |
+| payment.succeeded | guarded | concurrent | 200 | 0–0 | 0–0 | [1] |
+| payment.succeeded | guarded | crash_before_ack | 1 | 0–0 | 0–0 | [1] |
+JSON: reports/report-20261003T124437615309Z.json
+Markdown: reports/report-20261003T124437615309Z.md
+
+[exit_code=0]

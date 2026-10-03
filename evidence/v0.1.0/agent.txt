@@ -1,0 +1,6 @@
+$ .venv/bin/python examples/agent_loop.py
+naive: effects=2, trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call', 'tool_result']
+check_then_act: effects=1, trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call', 'tool_result']
+guarded: effects=1, trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call', 'tool_result']
+
+[exit_code=0]

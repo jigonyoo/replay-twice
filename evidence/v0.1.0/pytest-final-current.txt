@@ -1,0 +1,5 @@
+$ env 'TMPDIR=<project>/.tmp' .venv-current/bin/pytest -q
+.........................                                                [100%]
+25 passed in 2.00s
+
+[exit_code=0]
