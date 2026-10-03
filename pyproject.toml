@@ -23,4 +23,5 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]   # tests run from a plain checkout, without installing
 addopts = "-ra"
