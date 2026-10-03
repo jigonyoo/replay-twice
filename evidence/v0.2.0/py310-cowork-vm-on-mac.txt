@@ -1,0 +1,35 @@
+$ python3 --version
+Python 3.10.12
+$ uname -sm
+Linux aarch64
+$ pip install -e .   (offline, wheels from <project>/wheels)
+$ pytest -q
+............................................................             [100%]
+60 passed in 4.73s
+$ pytest -q examples/test_usage.py
+2 passed in 0.09s
+$ replay-twice report --runs 1 --repeats 50 --output <out>
+# replay-twice measurements
+
+Concurrency can vary across runs. Seed controls event IDs, not thread scheduling. check_then_act deliberately sleeps between reading and writing. SQLite ledger rows are simulated effects; no payment API is called.
+
+Python 3.10.12 on Linux-6.8.0-138-generic-aarch64-with-glibc2.35, package 0.2.0, 8 threads, 50 concurrent trials per cell, 1 runs, seed 0.
+
+Each cell: trials with a duplicated effect / trials where the handler raised, out of the trials per run. Ranges are exact minimum–maximum across runs.
+
+| Flow | Handler | duplicate | timeout_retry | concurrent | crash_before_ack |
+|---|---|---|---|---|---|
+| refund | naive | dup 1 / err 0 of 1 | dup 1 / err 0 of 1 | dup 50 / err 0 of 50 | dup 1 / err 0 of 1 |
+| refund | check_then_act | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 50 / err 0 of 50 | dup 0 / err 0 of 1 |
+| refund | guarded_raises | dup 0 / err 1 of 1 | dup 0 / err 1 of 1 | dup 0 / err 50 of 50 | dup 0 / err 1 of 1 |
+| refund | guarded | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 0 / err 0 of 50 | dup 0 / err 0 of 1 |
+| payment.succeeded webhook | naive | dup 1 / err 0 of 1 | dup 1 / err 0 of 1 | dup 50 / err 0 of 50 | dup 1 / err 0 of 1 |
+| payment.succeeded webhook | check_then_act | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 50 / err 0 of 50 | dup 0 / err 0 of 1 |
+| payment.succeeded webhook | guarded_raises | dup 0 / err 1 of 1 | dup 0 / err 1 of 1 | dup 0 / err 50 of 50 | dup 0 / err 1 of 1 |
+| payment.succeeded webhook | guarded | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 0 / err 0 of 50 | dup 0 / err 0 of 1 |
+| refund (async tool) | naive | dup 1 / err 0 of 1 | dup 1 / err 0 of 1 | dup 50 / err 0 of 50 | dup 1 / err 0 of 1 |
+| refund (async tool) | check_then_act | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 50 / err 0 of 50 | dup 0 / err 0 of 1 |
+| refund (async tool) | guarded_raises | dup 0 / err 1 of 1 | dup 0 / err 1 of 1 | dup 0 / err 50 of 50 | dup 0 / err 1 of 1 |
+| refund (async tool) | guarded | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 0 / err 0 of 50 | dup 0 / err 0 of 1 |
+JSON: <project>/report310/report-20261003T151454765048Z.json
+Markdown: <project>/report310/report-20261003T151454765048Z.md

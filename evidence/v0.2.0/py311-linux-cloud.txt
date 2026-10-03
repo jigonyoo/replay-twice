@@ -1,0 +1,42 @@
+$ python3 --version
+Python 3.11.15
+$ uname -sm
+Linux x86_64
+$ pytest -q
+60 passed in 5.09s
+$ pytest -q examples/test_usage.py
+2 passed in 0.06s
+$ python examples/agent_loop.py
+sync  naive           effects=2 retry=ok             trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call', 'tool_result']
+sync  check_then_act  effects=1 retry=ok             trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call', 'tool_result']
+sync  guarded_raises  effects=1 retry=IntegrityError trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call']
+sync  guarded         effects=1 retry=ok             trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call', 'tool_result']
+async naive           effects=2 retry=ok             trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call', 'tool_result']
+async check_then_act  effects=1 retry=ok             trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call', 'tool_result']
+async guarded_raises  effects=1 retry=IntegrityError trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call']
+async guarded         effects=1 retry=ok             trace=['tool_call', 'timeout', 'retry_same_arguments', 'tool_call', 'tool_result']
+$ replay-twice report   (defaults: 200 concurrent trials, 3 runs, 8 threads)
+# replay-twice measurements
+
+Concurrency can vary across runs. Seed controls event IDs, not thread scheduling. check_then_act deliberately sleeps between reading and writing. SQLite ledger rows are simulated effects; no payment API is called.
+
+Python 3.11.15 on Linux-6.18.44-fc-v64-x86_64-with-glibc2.39, package 0.2.0, 8 threads, 200 concurrent trials per cell, 3 runs, seed 0.
+
+Each cell: trials with a duplicated effect / trials where the handler raised, out of the trials per run. Ranges are exact minimum–maximum across runs.
+
+| Flow | Handler | duplicate | timeout_retry | concurrent | crash_before_ack |
+|---|---|---|---|---|---|
+| refund | naive | dup 1 / err 0 of 1 | dup 1 / err 0 of 1 | dup 200 / err 0 of 200 | dup 1 / err 0 of 1 |
+| refund | check_then_act | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 200 / err 0 of 200 | dup 0 / err 0 of 1 |
+| refund | guarded_raises | dup 0 / err 1 of 1 | dup 0 / err 1 of 1 | dup 0 / err 200 of 200 | dup 0 / err 1 of 1 |
+| refund | guarded | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 0 / err 0 of 200 | dup 0 / err 0 of 1 |
+| payment.succeeded webhook | naive | dup 1 / err 0 of 1 | dup 1 / err 0 of 1 | dup 200 / err 0 of 200 | dup 1 / err 0 of 1 |
+| payment.succeeded webhook | check_then_act | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 200 / err 0 of 200 | dup 0 / err 0 of 1 |
+| payment.succeeded webhook | guarded_raises | dup 0 / err 1 of 1 | dup 0 / err 1 of 1 | dup 0 / err 200 of 200 | dup 0 / err 1 of 1 |
+| payment.succeeded webhook | guarded | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 0 / err 0 of 200 | dup 0 / err 0 of 1 |
+| refund (async tool) | naive | dup 1 / err 0 of 1 | dup 1 / err 0 of 1 | dup 200 / err 0 of 200 | dup 1 / err 0 of 1 |
+| refund (async tool) | check_then_act | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 200 / err 0 of 200 | dup 0 / err 0 of 1 |
+| refund (async tool) | guarded_raises | dup 0 / err 1 of 1 | dup 0 / err 1 of 1 | dup 0 / err 200 of 200 | dup 0 / err 1 of 1 |
+| refund (async tool) | guarded | dup 0 / err 0 of 1 | dup 0 / err 0 of 1 | dup 0 / err 0 of 200 | dup 0 / err 0 of 1 |
+JSON: <out>/report-20261003T150804654663Z.json
+Markdown: <out>/report-20261003T150804654663Z.md
